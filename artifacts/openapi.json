@@ -1,0 +1,137 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Taobei App API",
+    "version": "1.0.0",
+    "description": "淘贝应用后端接口规范，覆盖登录与验证码相关场景"
+  },
+  "servers": [
+    { "url": "http://localhost:3000", "description": "本地开发服务器" }
+  ],
+  "paths": {
+    "/auth/request-code": {
+      "post": {
+        "summary": "请求验证码",
+        "description": "校验手机号格式，生成6位验证码，打印到控制台并在数据库中记录（有效期60秒）",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/PhoneNumberRequest" },
+              "examples": {
+                "valid": { "value": { "phone": "13800138000" } },
+                "invalid": { "value": { "phone": "123" } }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "验证码生成成功",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/RequestCodeResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "手机号格式无效",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "examples": {
+                  "invalidPhone": { "value": { "message": "请输入正确的手机号码" } }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "登录",
+        "description": "校验手机号是否已注册、验证码是否正确且未过期；成功则返回 token，并在前端提示后跳转首页",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LoginRequest" },
+              "examples": {
+                "valid": { "value": { "phone": "13800138000", "code": "123456" } },
+                "unregistered": { "value": { "phone": "13100000000", "code": "123456" } },
+                "wrongCode": { "value": { "phone": "13800138000", "code": "000000" } }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "登录成功",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/LoginSuccessResponse" },
+                "examples": {
+                  "success": { "value": { "success": true, "message": "登录成功", "token": "<jwt-token>" } }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "错误场景：未注册/验证码错误/手机号无效",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "examples": {
+                  "invalidPhone": { "value": { "message": "请输入正确的手机号码" } },
+                  "unregistered": { "value": { "message": "该手机号未注册，请先完成注册" } },
+                  "wrongCode": { "value": { "message": "验证码错误" } }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "PhoneNumberRequest": {
+        "type": "object",
+        "required": ["phone"],
+        "properties": {
+          "phone": { "type": "string", "pattern": "^1\\d{10}$", "example": "13800138000" }
+        }
+      },
+      "RequestCodeResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "message": { "type": "string", "example": "验证码已生成" }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": ["phone", "code"],
+        "properties": {
+          "phone": { "type": "string", "pattern": "^1\\d{10}$", "example": "13800138000" },
+          "code": { "type": "string", "minLength": 6, "maxLength": 6, "example": "123456" }
+        }
+      },
+      "LoginSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "message": { "type": "string", "example": "登录成功" },
+          "token": { "type": "string", "example": "<jwt-token>" }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string" }
+        }
+      }
+    }
+  }
+}

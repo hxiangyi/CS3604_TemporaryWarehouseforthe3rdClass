@@ -1,0 +1,49 @@
+{
+  "info": {
+    "_postman_id": "a1f1b8b0-0000-4b7b-aaaa-111111111111",
+    "name": "Taobei App API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "淘贝应用接口集合，包含请求验证码与登录接口的示例"
+  },
+  "item": [
+    {
+      "name": "请求验证码",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/auth/request-code",
+          "host": ["{{baseUrl}}"],
+          "path": ["auth", "request-code"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"phone\": \"13800138000\"\n}"
+        }
+      }
+    },
+    {
+      "name": "登录",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/auth/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["auth", "login"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"phone\": \"13800138000\",\n  \"code\": \"123456\"\n}"
+        }
+      }
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" }
+  ]
+}
