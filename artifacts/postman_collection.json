@@ -3,7 +3,7 @@
     "_postman_id": "a1f1b8b0-0000-4b7b-aaaa-111111111111",
     "name": "Taobei App API",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "淘贝应用接口集合，包含请求验证码与登录接口的示例"
+    "description": "淘贝应用接口集合，包含请求验证码、登录与注册接口示例"
   },
   "item": [
     {
@@ -39,6 +39,24 @@
         "body": {
           "mode": "raw",
           "raw": "{\n  \"phone\": \"13800138000\",\n  \"code\": \"123456\"\n}"
+        }
+      }
+    },
+    {
+      "name": "注册",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/auth/register",
+          "host": ["{{baseUrl}}"],
+          "path": ["auth", "register"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"phone\": \"13800138000\",\n  \"code\": \"123456\",\n  \"agree\": true\n}"
         }
       }
     }

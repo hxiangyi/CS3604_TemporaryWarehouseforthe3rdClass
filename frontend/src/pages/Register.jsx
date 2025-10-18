@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { requestCode, login } from '../utils/api'
+import { requestCode, register } from '../utils/api'
 import '../styles/auth.css'
 
-export default function Login() {
+export default function Register() {
   const navigate = useNavigate()
   const [phone, setPhone] = useState('')
   const [code, setCode] = useState('')
+  const [agree, setAgree] = useState(false)
   const [countdown, setCountdown] = useState(0)
   const [message, setMessage] = useState('')
 
@@ -40,7 +41,7 @@ export default function Login() {
     }
   }
 
-  // 提交登录
+  // 提交注册
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!isValidPhone(phone)) {
@@ -51,9 +52,13 @@ export default function Login() {
       setMessage('请输入验证码')
       return
     }
+    if (!agree) {
+      setMessage('请同意用户协议')
+      return
+    }
 
     try {
-      await login(phone, code)
+      await register(phone, code)
       navigate('/')
     } catch (error) {
       setMessage(error.message)
@@ -62,7 +67,7 @@ export default function Login() {
 
   return (
     <div className="auth-container">
-      <h2>登录</h2>
+      <h2>注册</h2>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <input
@@ -90,7 +95,19 @@ export default function Login() {
             className="form-input"
           />
         </div>
-        <button type="submit" className="submit-button">登录</button>
+        <div className="form-group">
+          <label className="agreement">
+            <input
+              type="checkbox"
+              checked={agree}
+              onChange={(e) => setAgree(e.target.checked)}
+            />
+            <span>同意《淘贝用户协议》</span>
+          </label>
+        </div>
+        <button type="submit" className="submit-button" disabled={!agree}>
+          注册
+        </button>
       </form>
       {message && <div className="message">{message}</div>}
     </div>

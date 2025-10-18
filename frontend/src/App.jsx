@@ -1,11 +1,17 @@
-import './App.css'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import Home from './pages/Home'
+import './styles/app.css'
 
-function App() {
+export default function App() {
   return (
-    <div style={{ padding: 16 }}>
-      <p>欢迎使用淘贝应用</p>
-    </div>
+    <Router>
+      <div className="app-container">
+        <main className="main-content">
+          <Routes>
+            <Route path="/" element={<Home />} />
+          </Routes>
+        </main>
+      </div>
+    </Router>
   )
 }
-
-export default App

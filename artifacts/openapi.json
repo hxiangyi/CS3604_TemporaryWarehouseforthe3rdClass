@@ -2,8 +2,8 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Taobei App API",
-    "version": "1.0.0",
-    "description": "淘贝应用后端接口规范，覆盖登录与验证码相关场景"
+    "version": "1.1.0",
+    "description": "淘贝应用后端接口规范，覆盖登录、注册与验证码相关场景（错误字段统一为 error）"
   },
   "servers": [
     { "url": "http://localhost:3000", "description": "本地开发服务器" }
@@ -11,7 +11,7 @@
   "paths": {
     "/auth/request-code": {
       "post": {
-        "summary": "请求验证码",
+        "summary": "请求验证码（登录/注册通用）",
         "description": "校验手机号格式，生成6位验证码，打印到控制台并在数据库中记录（有效期60秒）",
         "requestBody": {
           "required": true,
@@ -30,7 +30,10 @@
             "description": "验证码生成成功",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/RequestCodeResponse" }
+                "schema": { "$ref": "#/components/schemas/RequestCodeResponse" },
+                "examples": {
+                  "success": { "value": { "message": "验证码已发送", "seconds": 60 } }
+                }
               }
             }
           },
@@ -40,7 +43,7 @@
               "application/json": {
                 "schema": { "$ref": "#/components/schemas/ErrorResponse" },
                 "examples": {
-                  "invalidPhone": { "value": { "message": "请输入正确的手机号码" } }
+                  "invalidPhone": { "value": { "error": "请输入正确的手机号码" } }
                 }
               }
             }
@@ -51,7 +54,7 @@
     "/auth/login": {
       "post": {
         "summary": "登录",
-        "description": "校验手机号是否已注册、验证码是否正确且未过期；成功则返回 token，并在前端提示后跳转首页",
+        "description": "校验手机号是否已注册、验证码是否正确且未过期；成功则返回提示消息，前端可在提示后跳转首页",
         "requestBody": {
           "required": true,
           "content": {
@@ -70,22 +73,70 @@
             "description": "登录成功",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/LoginSuccessResponse" },
+                "schema": { "$ref": "#/components/schemas/MessageResponse" },
                 "examples": {
-                  "success": { "value": { "success": true, "message": "登录成功", "token": "<jwt-token>" } }
+                  "success": { "value": { "message": "登录成功" } }
                 }
               }
             }
           },
           "400": {
-            "description": "错误场景：未注册/验证码错误/手机号无效",
+            "description": "错误场景：未注册/验证码错误/验证码已过期/手机号无效",
             "content": {
               "application/json": {
                 "schema": { "$ref": "#/components/schemas/ErrorResponse" },
                 "examples": {
-                  "invalidPhone": { "value": { "message": "请输入正确的手机号码" } },
-                  "unregistered": { "value": { "message": "该手机号未注册，请先完成注册" } },
-                  "wrongCode": { "value": { "message": "验证码错误" } }
+                  "invalidPhone": { "value": { "error": "请输入正确的手机号码" } },
+                  "unregistered": { "value": { "error": "该手机号未注册，请先完成注册" } },
+                  "wrongCode": { "value": { "error": "验证码错误" } },
+                  "expired": { "value": { "error": "验证码已过期" } }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "summary": "注册",
+        "description": "校验手机号与验证码、协议勾选；已注册则直接提示并视为登录成功，未注册则创建用户并提示注册成功",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RegisterRequest" },
+              "examples": {
+                "valid": { "value": { "phone": "13800138000", "code": "123456", "agree": true } },
+                "notAgreed": { "value": { "phone": "13800138000", "code": "123456", "agree": false } },
+                "wrongCode": { "value": { "phone": "13800138000", "code": "000000", "agree": true } }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "注册成功或已注册直接登录",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MessageResponse" },
+                "examples": {
+                  "created": { "value": { "message": "注册成功" } },
+                  "already": { "value": { "message": "该手机号已注册，将直接为您登录" } }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "错误场景：手机号无效/未同意协议/验证码错误/验证码已过期",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "examples": {
+                  "invalidPhone": { "value": { "error": "请输入正确的手机号码" } },
+                  "notAgreed": { "value": { "error": "请先同意《淘贝用户协议》" } },
+                  "wrongCode": { "value": { "error": "验证码错误" } },
+                  "expired": { "value": { "error": "验证码已过期" } }
                 }
               }
             }
@@ -106,8 +157,8 @@
       "RequestCodeResponse": {
         "type": "object",
         "properties": {
-          "success": { "type": "boolean", "example": true },
-          "message": { "type": "string", "example": "验证码已生成" }
+          "message": { "type": "string", "example": "验证码已发送" },
+          "seconds": { "type": "integer", "example": 60 }
         }
       },
       "LoginRequest": {
@@ -118,18 +169,25 @@
           "code": { "type": "string", "minLength": 6, "maxLength": 6, "example": "123456" }
         }
       },
-      "LoginSuccessResponse": {
+      "RegisterRequest": {
+        "type": "object",
+        "required": ["phone", "code", "agree"],
+        "properties": {
+          "phone": { "type": "string", "pattern": "^1\\d{10}$", "example": "13800138000" },
+          "code": { "type": "string", "minLength": 6, "maxLength": 6, "example": "123456" },
+          "agree": { "type": "boolean", "example": true }
+        }
+      },
+      "MessageResponse": {
         "type": "object",
         "properties": {
-          "success": { "type": "boolean", "example": true },
-          "message": { "type": "string", "example": "登录成功" },
-          "token": { "type": "string", "example": "<jwt-token>" }
+          "message": { "type": "string" }
         }
       },
       "ErrorResponse": {
         "type": "object",
         "properties": {
-          "message": { "type": "string" }
+          "error": { "type": "string" }
         }
       }
     }

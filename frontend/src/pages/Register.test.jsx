@@ -2,7 +2,7 @@ import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
-import Login from './Login.jsx'
+import Register from './Register.jsx'
 
 // mock useNavigate 以验证跳转
 const mockNavigate = vi.fn()
@@ -11,7 +11,7 @@ vi.mock('react-router-dom', async () => {
   return { ...actual, useNavigate: () => mockNavigate }
 })
 
-describe('登录页交互', () => {
+describe('注册页交互', () => {
   beforeEach(() => {
     mockNavigate.mockReset()
     global.fetch = vi.fn()
@@ -24,8 +24,8 @@ describe('登录页交互', () => {
 
   test('请求验证码时手机号格式无效', async () => {
     render(
-      <MemoryRouter initialEntries={[{ pathname: '/login' }] }>
-        <Login />
+      <MemoryRouter initialEntries={[{ pathname: '/register' }] }>
+        <Register />
       </MemoryRouter>
     )
 
@@ -44,8 +44,8 @@ describe('登录页交互', () => {
     })
 
     render(
-      <MemoryRouter initialEntries={[{ pathname: '/login' }] }>
-        <Login />
+      <MemoryRouter initialEntries={[{ pathname: '/register' }] }>
+        <Register />
       </MemoryRouter>
     )
 
@@ -66,18 +66,14 @@ describe('登录页交互', () => {
     expect(screen.getByRole('button', { name: /58秒后重试/ })).toBeInTheDocument()
   })
 
-  test('使用未注册手机号登录', async () => {
-    global.fetch.mockResolvedValue({
-      ok: false,
-      json: async () => ({ error: '该手机号未注册，请先完成注册' })
-    })
-
+  test('未同意用户协议时注册按钮禁用', async () => {
     render(
-      <MemoryRouter initialEntries={[{ pathname: '/login' }] }>
-        <Login />
+      <MemoryRouter initialEntries={[{ pathname: '/register' }] }>
+        <Register />
       </MemoryRouter>
     )
 
+    // 输入手机号和验证码，但不勾选协议
     await userEvent.type(
       screen.getByPlaceholderText('请输入手机号'),
       '13800138000'
@@ -86,19 +82,24 @@ describe('登录页交互', () => {
       screen.getByPlaceholderText('请输入验证码'),
       '123456'
     )
-    await userEvent.click(screen.getByRole('button', { name: '登录' }))
-    expect(screen.getByText('该手机号未注册，请先完成注册')).toBeInTheDocument()
+
+    // 注册按钮应禁用
+    expect(screen.getByRole('button', { name: '注册' })).toBeDisabled()
+
+    // 勾选协议后按钮可用
+    await userEvent.click(screen.getByRole('checkbox', { name: /同意《淘贝用户协议》/ }))
+    expect(screen.getByRole('button', { name: '注册' })).toBeEnabled()
   })
 
-  test('使用错误的验证码登录', async () => {
+  test('使用错误的验证码注册', async () => {
     global.fetch.mockResolvedValue({
       ok: false,
       json: async () => ({ error: '验证码错误' })
     })
 
     render(
-      <MemoryRouter initialEntries={[{ pathname: '/login' }] }>
-        <Login />
+      <MemoryRouter initialEntries={[{ pathname: '/register' }] }>
+        <Register />
       </MemoryRouter>
     )
 
@@ -110,19 +111,20 @@ describe('登录页交互', () => {
       screen.getByPlaceholderText('请输入验证码'),
       '000000'
     )
-    await userEvent.click(screen.getByRole('button', { name: '登录' }))
+    await userEvent.click(screen.getByRole('checkbox', { name: /同意《淘贝用户协议》/ }))
+    await userEvent.click(screen.getByRole('button', { name: '注册' }))
     expect(screen.getByText('验证码错误')).toBeInTheDocument()
   })
 
-  test('成功登录后提示并跳转首页', async () => {
+  test('使用已注册手机号注册时直接登录', async () => {
     global.fetch.mockResolvedValue({
       ok: true,
-      json: async () => ({ success: true, message: '登录成功', token: 't' }),
+      json: async () => ({ message: '该手机号已注册，将直接为您登录' })
     })
 
     render(
-      <MemoryRouter initialEntries={[{ pathname: '/login' }] }>
-        <Login />
+      <MemoryRouter initialEntries={[{ pathname: '/register' }] }>
+        <Register />
       </MemoryRouter>
     )
 
@@ -134,8 +136,39 @@ describe('登录页交互', () => {
       screen.getByPlaceholderText('请输入验证码'),
       '123456'
     )
-    await userEvent.click(screen.getByRole('button', { name: '登录' }))
-    expect(screen.getByText('登录成功')).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('checkbox', { name: /同意《淘贝用户协议》/ }))
+    await userEvent.click(screen.getByRole('button', { name: '注册' }))
+    expect(screen.getByText('该手机号已注册，将直接为您登录')).toBeInTheDocument()
+    // 跳转在800ms后触发
+    vi.useFakeTimers()
+    vi.advanceTimersByTime(800)
+    vi.useRealTimers()
+    expect(mockNavigate).toHaveBeenCalledWith('/')
+  })
+
+  test('注册成功后提示并跳转首页', async () => {
+    global.fetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ message: '注册成功' })
+    })
+
+    render(
+      <MemoryRouter initialEntries={[{ pathname: '/register' }] }>
+        <Register />
+      </MemoryRouter>
+    )
+
+    await userEvent.type(
+      screen.getByPlaceholderText('请输入手机号'),
+      '13800138000'
+    )
+    await userEvent.type(
+      screen.getByPlaceholderText('请输入验证码'),
+      '123456'
+    )
+    await userEvent.click(screen.getByRole('checkbox', { name: /同意《淘贝用户协议》/ }))
+    await userEvent.click(screen.getByRole('button', { name: '注册' }))
+    expect(screen.getByText('注册成功')).toBeInTheDocument()
     // 跳转在800ms后触发
     vi.useFakeTimers()
     vi.advanceTimersByTime(800)

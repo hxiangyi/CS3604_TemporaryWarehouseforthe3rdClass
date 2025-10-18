@@ -1,0 +1,26 @@
+:root {
+  --bg-primary: #2C2C34;
+  --bg-secondary: #363641;
+  --text-primary: #E8E8E8;
+  --text-secondary: #B5B5BE;
+  --accent-primary: #A7A7B3;
+  --accent-hover: #BDBDC6;
+  --accent-active: #8E8E99;
+  --border-color: #4A4A54;
+  --error-color: #C1867B;
+  --success-color: #94A89A;
+  --input-bg: #363641;
+  --input-border: #4A4A54;
+  --input-placeholder: #8E8E99;
+}
+
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+  background-color: var(--bg-secondary);
+}
