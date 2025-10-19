@@ -37,18 +37,18 @@ describe('注册页面', () => {
   describe('手机号验证', () => {
     it('空手机号提示错误', async () => {
       renderRegister()
-      const getCodeButton = screen.getByText('获取验证码')
+      const getCodeButton = screen.getByTestId('request-code-button')
       await userEvent.click(getCodeButton)
-      expect(screen.getByText('请输入手机号')).toBeInTheDocument()
+      expect(screen.getByTestId('message')).toHaveTextContent('请输入手机号')
     })
 
     it('无效手机号提示错误', async () => {
       renderRegister()
-      const phoneInput = screen.getByPlaceholderText('请输入手机号')
+      const phoneInput = screen.getByTestId('phone-input')
       await userEvent.type(phoneInput, '1234')
-      const getCodeButton = screen.getByText('获取验证码')
+      const getCodeButton = screen.getByTestId('request-code-button')
       await userEvent.click(getCodeButton)
-      expect(screen.getByText('请输入正确的手机号')).toBeInTheDocument()
+      expect(screen.getByTestId('message')).toHaveTextContent('请输入正确的手机号')
     })
   })
 
@@ -58,14 +58,14 @@ describe('注册页面', () => {
       requestCode.mockResolvedValueOnce({ message: '验证码已发送', seconds: 60 })
 
       renderRegister()
-      const phoneInput = screen.getByPlaceholderText('请输入手机号')
-      const getCodeButton = screen.getByText('获取验证码')
+      const phoneInput = screen.getByTestId('phone-input')
+      const getCodeButton = screen.getByTestId('request-code-button')
 
       await userEvent.type(phoneInput, '13800138000')
       await userEvent.click(getCodeButton)
 
       await waitFor(() => {
-        expect(screen.getByText('60秒后重试')).toBeInTheDocument()
+        expect(getCodeButton).toHaveTextContent('60秒后重试')
       })
     })
 
@@ -74,14 +74,14 @@ describe('注册页面', () => {
       requestCode.mockRejectedValueOnce(new Error('请输入正确的手机号'))
 
       renderRegister()
-      const phoneInput = screen.getByPlaceholderText('请输入手机号')
-      const getCodeButton = screen.getByText('获取验证码')
+      const phoneInput = screen.getByTestId('phone-input')
+      const getCodeButton = screen.getByTestId('request-code-button')
 
       await userEvent.type(phoneInput, '13800138000')
       await userEvent.click(getCodeButton)
 
       await waitFor(() => {
-        expect(screen.getByText('请输入正确的手机号')).toBeInTheDocument()
+        expect(screen.getByTestId('message')).toHaveTextContent('请输入正确的手机号')
       })
     })
   })
@@ -91,16 +91,16 @@ describe('注册页面', () => {
       const { register } = await import('../../src/utils/api')
 
       renderRegister()
-      const phoneInput = screen.getByPlaceholderText('请输入手机号')
-      const codeInput = screen.getByPlaceholderText('请输入验证码')
-      const submitButton = screen.getByText('注册')
+      const phoneInput = screen.getByTestId('phone-input')
+      const codeInput = screen.getByTestId('code-input')
+      const submitButton = screen.getByTestId('submit-button')
 
       await userEvent.type(phoneInput, '13800138000')
       await userEvent.type(codeInput, '123456')
       await userEvent.click(submitButton)
 
       await waitFor(() => {
-        expect(screen.getByText('请先同意《淘贝用户协议》')).toBeInTheDocument()
+        expect(screen.getByTestId('message')).toHaveTextContent('请先同意《淘贝用户协议》')
       })
     })
   })
@@ -111,10 +111,10 @@ describe('注册页面', () => {
       register.mockResolvedValueOnce({ message: '注册成功' })
 
       renderRegister()
-      const phoneInput = screen.getByPlaceholderText('请输入手机号')
-      const codeInput = screen.getByPlaceholderText('请输入验证码')
-      const agreeCheckbox = screen.getByRole('checkbox')
-      const submitButton = screen.getByText('注册')
+      const phoneInput = screen.getByTestId('phone-input')
+      const codeInput = screen.getByTestId('code-input')
+      const agreeCheckbox = screen.getByTestId('agree-checkbox')
+      const submitButton = screen.getByTestId('submit-button')
 
       await userEvent.type(phoneInput, '13800138000')
       await userEvent.type(codeInput, '123456')
@@ -131,10 +131,10 @@ describe('注册页面', () => {
       register.mockResolvedValueOnce({ message: '该手机号已注册，将直接为您登录' })
 
       renderRegister()
-      const phoneInput = screen.getByPlaceholderText('请输入手机号')
-      const codeInput = screen.getByPlaceholderText('请输入验证码')
-      const agreeCheckbox = screen.getByRole('checkbox')
-      const submitButton = screen.getByText('注册')
+      const phoneInput = screen.getByTestId('phone-input')
+      const codeInput = screen.getByTestId('code-input')
+      const agreeCheckbox = screen.getByTestId('agree-checkbox')
+      const submitButton = screen.getByTestId('submit-button')
 
       await userEvent.type(phoneInput, '13800138000')
       await userEvent.type(codeInput, '123456')
@@ -151,10 +151,10 @@ describe('注册页面', () => {
       register.mockRejectedValueOnce(new Error('验证码错误'))
 
       renderRegister()
-      const phoneInput = screen.getByPlaceholderText('请输入手机号')
-      const codeInput = screen.getByPlaceholderText('请输入验证码')
-      const agreeCheckbox = screen.getByRole('checkbox')
-      const submitButton = screen.getByText('注册')
+      const phoneInput = screen.getByTestId('phone-input')
+      const codeInput = screen.getByTestId('code-input')
+      const agreeCheckbox = screen.getByTestId('agree-checkbox')
+      const submitButton = screen.getByTestId('submit-button')
 
       await userEvent.type(phoneInput, '13800138000')
       await userEvent.type(codeInput, '000000')
@@ -162,7 +162,7 @@ describe('注册页面', () => {
       await userEvent.click(submitButton)
 
       await waitFor(() => {
-        expect(screen.getByText('验证码错误')).toBeInTheDocument()
+        expect(screen.getByTestId('message')).toHaveTextContent('验证码错误')
       })
     })
 
@@ -171,10 +171,10 @@ describe('注册页面', () => {
       register.mockRejectedValueOnce(new Error('验证码已过期'))
 
       renderRegister()
-      const phoneInput = screen.getByPlaceholderText('请输入手机号')
-      const codeInput = screen.getByPlaceholderText('请输入验证码')
-      const agreeCheckbox = screen.getByRole('checkbox')
-      const submitButton = screen.getByText('注册')
+      const phoneInput = screen.getByTestId('phone-input')
+      const codeInput = screen.getByTestId('code-input')
+      const agreeCheckbox = screen.getByTestId('agree-checkbox')
+      const submitButton = screen.getByTestId('submit-button')
 
       await userEvent.type(phoneInput, '13800138000')
       await userEvent.type(codeInput, '123456')
@@ -182,7 +182,7 @@ describe('注册页面', () => {
       await userEvent.click(submitButton)
 
       await waitFor(() => {
-        expect(screen.getByText('验证码已过期')).toBeInTheDocument()
+        expect(screen.getByTestId('message')).toHaveTextContent('验证码已过期')
       })
     })
   })

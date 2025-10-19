@@ -88,6 +88,7 @@ export default function Login() {
               onChange={(e) => setPhone(e.target.value)}
               placeholder="请输入手机号"
               className="form-input"
+              data-testid="phone-input"
             />
           </div>
           <div className="form-group">
@@ -97,19 +98,27 @@ export default function Login() {
               onChange={(e) => setCode(e.target.value)}
               placeholder="请输入验证码"
               className="form-input"
+              data-testid="code-input"
             />
             <button
               type="button"
               onClick={handleRequestCode}
               disabled={countdown > 0}
               className="code-button"
+              data-testid="request-code-button"
             >
               {countdown > 0 ? `${countdown}秒后重试` : '获取验证码'}
             </button>
           </div>
-          <button type="submit" className="submit-button">登录</button>
+          <button
+            type="submit"
+            className="submit-button"
+            data-testid="submit-button"
+          >
+            登录
+          </button>
         </form>
-        {message && <div className="message">{message}</div>}
+        {message && <div className="message" data-testid="message">{message}</div>}
       </div>
     </div>
   )

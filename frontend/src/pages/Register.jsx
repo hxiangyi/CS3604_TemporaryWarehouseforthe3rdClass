@@ -66,7 +66,7 @@ export default function Register() {
     }
 
     try {
-      const response = await register(phone, code, agree)
+      const response = await register({ phone, code, agree })
       setMessage(response.message)
       navigate('/')
     } catch (error) {
@@ -89,6 +89,7 @@ export default function Register() {
               onChange={(e) => setPhone(e.target.value)}
               placeholder="请输入手机号"
               className="form-input"
+              data-testid="phone-input"
             />
           </div>
           <div className="form-group">
@@ -98,12 +99,14 @@ export default function Register() {
               onChange={(e) => setCode(e.target.value)}
               placeholder="请输入验证码"
               className="form-input"
+              data-testid="code-input"
             />
             <button
               type="button"
               onClick={handleRequestCode}
               disabled={countdown > 0}
               className="code-button"
+              data-testid="request-code-button"
             >
               {countdown > 0 ? `${countdown}秒后重试` : '获取验证码'}
             </button>
@@ -114,15 +117,21 @@ export default function Register() {
                 type="checkbox"
                 checked={agree}
                 onChange={(e) => setAgree(e.target.checked)}
+                data-testid="agree-checkbox"
               />
               <span>同意《淘贝用户协议》</span>
             </label>
           </div>
-          <button type="submit" className="submit-button" disabled={!agree}>
+          <button
+            type="submit"
+            className="submit-button"
+            disabled={!agree}
+            data-testid="submit-button"
+          >
             注册
           </button>
         </form>
-        {message && <div className="message">{message}</div>}
+        {message && <div className="message" data-testid="message">{message}</div>}
       </div>
     </div>
   )

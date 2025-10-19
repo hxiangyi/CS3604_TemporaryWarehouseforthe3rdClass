@@ -57,12 +57,13 @@ export async function login({ phone, code }) {
 
 /**
  * 注册
- * @param {string} phone - 手机号
- * @param {string} code - 验证码
- * @param {boolean} agree - 是否同意用户协议
+ * @param {Object} params - 注册参数
+ * @param {string} params.phone - 手机号
+ * @param {string} params.code - 验证码
+ * @param {boolean} [params.agree=true] - 是否同意用户协议
  * @returns {Promise<Object>} 用户信息
  */
-export async function register(phone, code, agree = true) {
+export async function register({ phone, code, agree = true }) {
   return request('/auth/register', {
     method: 'POST',
     body: JSON.stringify({ phone, code, agree }),

@@ -14,6 +14,7 @@
   margin-bottom: 20px;
   border-radius: 8px;
   overflow: hidden;
+  background-color: #1a1a1a;
 }
 
 .tab {
@@ -21,14 +22,15 @@
   padding: 12px;
   text-align: center;
   color: #999;
-  background-color: #1a1a1a;
   cursor: pointer;
   transition: all 0.3s;
+  font-size: 16px;
 }
 
 .tab.active {
   color: #fff;
   background-color: #333;
+  font-weight: 500;
 }
 
 .auth-content {
@@ -37,6 +39,7 @@
   padding: 24px;
   background-color: #1a1a1a;
   border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .auth-type-tabs {
@@ -50,11 +53,13 @@
   color: #999;
   cursor: pointer;
   transition: all 0.3s;
+  font-size: 14px;
 }
 
 .type-tab.active {
   color: #fff;
   border-bottom: 2px solid #1890ff;
+  font-weight: 500;
 }
 
 .form-group {
@@ -81,6 +86,7 @@
 .form-input:focus {
   outline: none;
   border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
 }
 
 .code-button {
@@ -93,6 +99,7 @@
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.3s;
+  white-space: nowrap;
 }
 
 .code-button:hover:not(:disabled) {
@@ -116,6 +123,7 @@
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.3s;
+  font-weight: 500;
 }
 
 .submit-button:hover:not(:disabled) {
@@ -134,6 +142,8 @@
   color: #ff4d4f;
   font-size: 14px;
   text-align: center;
+  background-color: rgba(255, 77, 79, 0.1);
+  border-radius: 4px;
 }
 
 .agreement {
@@ -154,4 +164,13 @@
 .agreement span {
   color: #999;
   font-size: 14px;
+}
+
+.agreement span a {
+  color: #1890ff;
+  text-decoration: none;
+}
+
+.agreement span a:hover {
+  text-decoration: underline;
 }
