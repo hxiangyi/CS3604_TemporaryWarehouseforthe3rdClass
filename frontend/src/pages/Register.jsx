@@ -18,15 +18,19 @@ export default function Register() {
 
   // 请求验证码
   const handleRequestCode = async () => {
+    if (!phone) {
+      setMessage('请输入手机号')
+      return
+    }
     if (!isValidPhone(phone)) {
       setMessage('请输入正确的手机号')
       return
     }
 
     try {
-      await requestCode(phone)
-      setMessage('验证码已发送')
-      setCountdown(60)
+      const response = await requestCode(phone)
+      setMessage(response.message)
+      setCountdown(response.seconds)
       const timer = setInterval(() => {
         setCountdown((prev) => {
           if (prev <= 1) {
@@ -44,6 +48,10 @@ export default function Register() {
   // 提交注册
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (!phone) {
+      setMessage('请输入手机号')
+      return
+    }
     if (!isValidPhone(phone)) {
       setMessage('请输入正确的手机号')
       return
@@ -53,12 +61,13 @@ export default function Register() {
       return
     }
     if (!agree) {
-      setMessage('请同意用户协议')
+      setMessage('请先同意《淘贝用户协议》')
       return
     }
 
     try {
-      await register(phone, code)
+      const response = await register(phone, code, agree)
+      setMessage(response.message)
       navigate('/')
     } catch (error) {
       setMessage(error.message)
@@ -67,49 +76,54 @@ export default function Register() {
 
   return (
     <div className="auth-container">
-      <h2>注册</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <input
-            type="text"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder="请输入手机号"
-            className="form-input"
-          />
-          <button
-            type="button"
-            onClick={handleRequestCode}
-            disabled={countdown > 0}
-            className="code-button"
-          >
-            {countdown > 0 ? `${countdown}秒后重试` : '获取验证码'}
-          </button>
-        </div>
-        <div className="form-group">
-          <input
-            type="text"
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            placeholder="请输入验证码"
-            className="form-input"
-          />
-        </div>
-        <div className="form-group">
-          <label className="agreement">
+      <div className="auth-tabs">
+        <div className="tab" onClick={() => navigate('/login')}>登录</div>
+        <div className="tab active">注册</div>
+      </div>
+      <div className="auth-content">
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
             <input
-              type="checkbox"
-              checked={agree}
-              onChange={(e) => setAgree(e.target.checked)}
+              type="text"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="请输入手机号"
+              className="form-input"
             />
-            <span>同意《淘贝用户协议》</span>
-          </label>
-        </div>
-        <button type="submit" className="submit-button" disabled={!agree}>
-          注册
-        </button>
-      </form>
-      {message && <div className="message">{message}</div>}
+          </div>
+          <div className="form-group">
+            <input
+              type="text"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              placeholder="请输入验证码"
+              className="form-input"
+            />
+            <button
+              type="button"
+              onClick={handleRequestCode}
+              disabled={countdown > 0}
+              className="code-button"
+            >
+              {countdown > 0 ? `${countdown}秒后重试` : '获取验证码'}
+            </button>
+          </div>
+          <div className="form-group">
+            <label className="agreement">
+              <input
+                type="checkbox"
+                checked={agree}
+                onChange={(e) => setAgree(e.target.checked)}
+              />
+              <span>同意《淘贝用户协议》</span>
+            </label>
+          </div>
+          <button type="submit" className="submit-button" disabled={!agree}>
+            注册
+          </button>
+        </form>
+        {message && <div className="message">{message}</div>}
+      </div>
     </div>
   )
 }
