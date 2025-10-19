@@ -1,5 +1,5 @@
 :root {
-  --bg-primary: #2C2C34;
+  --bg-primary: #363641;
   --bg-secondary: #363641;
   --text-primary: #E8E8E8;
   --text-secondary: #B5B5BE;
@@ -18,9 +18,9 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background-color: var(--bg-secondary);
 }
 
 .main-content {
   flex: 1;
-  background-color: var(--bg-secondary);
 }

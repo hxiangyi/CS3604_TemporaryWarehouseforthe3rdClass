@@ -106,6 +106,8 @@ export default function Home() {
             onClick={() => {
               setIsLogin(true);
               setMessage('');
+              setCode('');
+              setCountdown(0);
             }}
           >
             登录
@@ -115,6 +117,8 @@ export default function Home() {
             onClick={() => {
               setIsLogin(false);
               setMessage('');
+              setCode('');
+              setCountdown(0);
             }}
           >
             注册
@@ -125,13 +129,21 @@ export default function Home() {
           <div className="login-mode-switch">
             <button
               className={`mode-button ${loginMode === 'code' ? 'active' : ''}`}
-              onClick={() => setLoginMode('code')}
+              onClick={() => {
+                setLoginMode('code');
+                setCode('');
+                setCountdown(0);
+              }}
             >
               验证码登录
             </button>
             <button
               className={`mode-button ${loginMode === 'password' ? 'active' : ''}`}
-              onClick={() => setLoginMode('password')}
+              onClick={() => {
+                setLoginMode('password');
+                setCode('');
+                setCountdown(0);
+              }}
             >
               密码登录
             </button>
