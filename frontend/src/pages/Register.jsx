@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { requestCode, register } from '../utils/api'
 import '../styles/auth.css'
@@ -10,6 +10,15 @@ export default function Register() {
   const [agree, setAgree] = useState(false)
   const [countdown, setCountdown] = useState(0)
   const [message, setMessage] = useState('')
+
+  // 清理定时器
+  useEffect(() => {
+    return () => {
+      if (countdown > 0) {
+        setCountdown(0)
+      }
+    }
+  }, [])
 
   // 验证手机号格式
   const isValidPhone = (phone) => {
@@ -61,14 +70,17 @@ export default function Register() {
       return
     }
     if (!agree) {
-      setMessage('请先同意《淘贝用户协议》')
+      setMessage('同意用户协议和隐私政策')
       return
     }
 
     try {
-      const response = await register({ phone, code, agree })
+      const response = await register({ phone, code })
       setMessage(response.message)
-      navigate('/')
+      // 延迟800ms后跳转
+      setTimeout(() => {
+        navigate('/')
+      }, 800)
     } catch (error) {
       setMessage(error.message)
     }
@@ -119,13 +131,12 @@ export default function Register() {
                 onChange={(e) => setAgree(e.target.checked)}
                 data-testid="agree-checkbox"
               />
-              <span>同意《淘贝用户协议》</span>
+              <span>同意《淘贝用户协议》和《隐私政策》</span>
             </label>
           </div>
           <button
             type="submit"
             className="submit-button"
-            disabled={!agree}
             data-testid="submit-button"
           >
             注册

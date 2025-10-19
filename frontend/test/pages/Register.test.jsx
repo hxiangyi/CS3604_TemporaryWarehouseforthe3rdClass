@@ -93,14 +93,20 @@ describe('注册页面', () => {
       renderRegister()
       const phoneInput = screen.getByTestId('phone-input')
       const codeInput = screen.getByTestId('code-input')
+      const agreeCheckbox = screen.getByTestId('agree-checkbox')
       const submitButton = screen.getByTestId('submit-button')
 
       await userEvent.type(phoneInput, '13800138000')
       await userEvent.type(codeInput, '123456')
+      
+      // 先勾选复选框，使提交按钮可用
+      await userEvent.click(agreeCheckbox)
+      // 再取消勾选
+      await userEvent.click(agreeCheckbox)
       await userEvent.click(submitButton)
 
       await waitFor(() => {
-        expect(screen.getByTestId('message')).toHaveTextContent('请先同意《淘贝用户协议》')
+        expect(screen.getByTestId('message')).toHaveTextContent('同意用户协议和隐私政策')
       })
     })
   })

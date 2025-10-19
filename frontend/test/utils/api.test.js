@@ -83,7 +83,7 @@ describe('API 函数测试', () => {
         json: () => Promise.resolve({ message: '注册成功' })
       })
 
-      const result = await register('13800138000', '123456')
+      const result = await register({ phone: '13800138000', code: '123456' })
       expect(result).toEqual({ message: '注册成功' })
     })
 
@@ -93,7 +93,7 @@ describe('API 函数测试', () => {
         json: () => Promise.resolve({ message: '该手机号已注册，将直接为您登录' })
       })
 
-      const result = await register('13800138000', '123456')
+      const result = await register({ phone: '13800138000', code: '123456' })
       expect(result).toEqual({ message: '该手机号已注册，将直接为您登录' })
     })
 
@@ -103,7 +103,7 @@ describe('API 函数测试', () => {
         json: () => Promise.resolve({ error: '验证码错误' })
       })
 
-      await expect(register('13800138000', '000000'))
+      await expect(register({ phone: '13800138000', code: '000000' }))
         .rejects.toThrow('验证码错误')
     })
 
@@ -113,7 +113,7 @@ describe('API 函数测试', () => {
         json: () => Promise.resolve({ error: '验证码已过期' })
       })
 
-      await expect(register('13800138000', '123456'))
+      await expect(register({ phone: '13800138000', code: '123456' }))
         .rejects.toThrow('验证码已过期')
     })
   })

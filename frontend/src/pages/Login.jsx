@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { requestCode, login } from '../utils/api'
 import '../styles/auth.css'
@@ -9,6 +9,15 @@ export default function Login() {
   const [code, setCode] = useState('')
   const [countdown, setCountdown] = useState(0)
   const [message, setMessage] = useState('')
+
+  // 清理定时器
+  useEffect(() => {
+    return () => {
+      if (countdown > 0) {
+        setCountdown(0)
+      }
+    }
+  }, [])
 
   // 验证手机号格式
   const isValidPhone = (phone) => {
@@ -63,7 +72,10 @@ export default function Login() {
     try {
       const response = await login({ phone, code })
       setMessage(response.message)
-      navigate('/')
+      // 延迟800ms后跳转
+      setTimeout(() => {
+        navigate('/')
+      }, 800)
     } catch (error) {
       setMessage(error.message)
     }
