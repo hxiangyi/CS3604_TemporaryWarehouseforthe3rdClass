@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { requestCode, login, register } from '../utils/api';
 import '../styles/home.css';
+import { login, register, requestCode, verifyToken } from '../utils/api';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -13,6 +13,40 @@ export default function Home() {
   const [countdown, setCountdown] = useState(0);
   const [message, setMessage] = useState('');
   const [agreement, setAgreement] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [isAutoLoggingIn, setIsAutoLoggingIn] = useState(true);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  // 自动登录：检查本地存储的 token
+  useEffect(() => {
+    const checkAutoLogin = async () => {
+      const savedToken = localStorage.getItem('authToken');
+      if (savedToken) {
+        try {
+          const response = await verifyToken(savedToken);
+          setCurrentUser(response.user);
+          setMessage(`欢迎回来，${response.user.phone}`);
+        } catch (error) {
+          // Token 无效或过期，清除本地存储
+          localStorage.removeItem('authToken');
+        }
+      }
+      setIsAutoLoggingIn(false);
+    };
+
+    checkAutoLogin();
+  }, []);
+
+  // 退出登录
+  const handleLogout = () => {
+    localStorage.removeItem('authToken');
+    setCurrentUser(null);
+    setMessage('已退出登录');
+    setPhone('');
+    setCode('');
+    setPassword('');
+    setRememberMe(false);
+  };
 
   const handlePhoneChange = (e) => {
     setPhone(e.target.value);
@@ -70,7 +104,15 @@ export default function Home() {
             setMessage('请输入验证码');
             return;
           }
-          await login({ phone, code });
+          const response = await login({ phone, code, rememberMe });
+
+          // 如果勾选了"记住我"且返回了 token，保存到本地
+          if (rememberMe && response.token) {
+            localStorage.setItem('authToken', response.token);
+          }
+
+          setCurrentUser(response.user);
+          setMessage('登录成功');
         } else {
           if (!password) {
             setMessage('请输入密码');
@@ -78,7 +120,6 @@ export default function Home() {
           }
           await login({ phone, password });
         }
-        navigate('/');
       } else {
         // 注册逻辑
         if (!code) {
@@ -89,13 +130,47 @@ export default function Home() {
           setMessage('请同意用户协议');
           return;
         }
-        await register({ phone, code });
-        navigate('/');
+        const response = await register({ phone, code, agree: agreement, rememberMe });
+
+        // 如果勾选了"记住我"且返回了 token，保存到本地
+        if (rememberMe && response.token) {
+          localStorage.setItem('authToken', response.token);
+        }
+
+        setCurrentUser(response.user);
+        setMessage(response.message || '注册成功');
       }
     } catch (error) {
       setMessage(error.message || (isLogin ? '登录失败' : '注册失败'));
     }
   };
+
+  // 如果正在自动登录，显示加载状态
+  if (isAutoLoggingIn) {
+    return (
+      <div className="home-container">
+        <div className="auth-box">
+          <div className="loading">正在加载...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // 如果已登录，显示欢迎页面
+  if (currentUser) {
+    return (
+      <div className="home-container">
+        <div className="auth-box">
+          <h2>欢迎回来！</h2>
+          <p>您已登录，手机号：{currentUser.phone}</p>
+          {message && <div className="message success">{message}</div>}
+          <button onClick={handleLogout} className="submit-button">
+            退出登录
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="home-container">
@@ -205,6 +280,17 @@ export default function Home() {
               </label>
             </div>
           )}
+
+          <div className="form-group remember-me">
+            <label>
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+              />
+              记住我（7天内自动登录）
+            </label>
+          </div>
 
           {message && <div className="message">{message}</div>}
 
