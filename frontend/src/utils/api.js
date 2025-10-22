@@ -46,12 +46,13 @@ export async function requestCode(phone) {
  * @param {Object} params - 登录参数
  * @param {string} params.phone - 手机号
  * @param {string} params.code - 验证码
+ * @param {boolean} [params.rememberMe=false] - 是否记住我
  * @returns {Promise<Object>} 用户信息
  */
-export async function login({ phone, code }) {
+export async function login({ phone, code, rememberMe = false }) {
   return request('/auth/login', {
     method: 'POST',
-    body: JSON.stringify({ phone, code }),
+    body: JSON.stringify({ phone, code, rememberMe }),
   })
 }
 
@@ -61,11 +62,24 @@ export async function login({ phone, code }) {
  * @param {string} params.phone - 手机号
  * @param {string} params.code - 验证码
  * @param {boolean} [params.agree=true] - 是否同意用户协议
+ * @param {boolean} [params.rememberMe=false] - 是否记住我
  * @returns {Promise<Object>} 用户信息
  */
-export async function register({ phone, code, agree = true }) {
+export async function register({ phone, code, agree = true, rememberMe = false }) {
   return request('/auth/register', {
     method: 'POST',
-    body: JSON.stringify({ phone, code, agree }),
+    body: JSON.stringify({ phone, code, agree, rememberMe }),
+  })
+}
+
+/**
+ * 验证 token（用于自动登录）
+ * @param {string} token - 会话令牌
+ * @returns {Promise<Object>} 用户信息
+ */
+export async function verifyToken(token) {
+  return request('/auth/verify-token', {
+    method: 'POST',
+    body: JSON.stringify({ token }),
   })
 }

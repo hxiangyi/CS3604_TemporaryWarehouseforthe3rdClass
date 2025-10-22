@@ -31,7 +31,19 @@ async function initDb() {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
-  
+
+  // 创建会话令牌表（用于"记住我"功能）
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS session_tokens (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      token TEXT UNIQUE NOT NULL,
+      expires_at DATETIME NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    )
+  `);
+
   await db.close();
 }
 
