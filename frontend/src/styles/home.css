@@ -159,10 +159,43 @@
   height: 16px;
 }
 
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.remember-me label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.remember-me input[type="checkbox"] {
+  margin-right: 8px;
+  accent-color: var(--accent-primary);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-secondary);
+  font-size: 16px;
+}
+
 .message {
   color: var(--error-color);
   font-size: 14px;
   margin-top: -8px;
+}
+
+.message.success {
+  color: #4caf50;
 }
 
 .submit-button {
