@@ -32,12 +32,13 @@ async function request(endpoint, options = {}) {
 /**
  * 请求验证码
  * @param {string} phone - 手机号
+ * @param {boolean} isLogin - 是否为登录请求
  * @returns {Promise<void>}
  */
-export async function requestCode(phone) {
+export async function requestCode(phone, isLogin = false) {
   return request('/auth/request-code', {
     method: 'POST',
-    body: JSON.stringify({ phone }),
+    body: JSON.stringify({ phone, isLogin }),
   })
 }
 
@@ -45,13 +46,15 @@ export async function requestCode(phone) {
  * 登录
  * @param {Object} params - 登录参数
  * @param {string} params.phone - 手机号
- * @param {string} params.code - 验证码
+ * @param {string} [params.code] - 验证码（验证码登录时必填）
+ * @param {string} [params.password] - 密码（密码登录时必填）
+ * @param {string} params.loginType - 登录类型（'code' 或 'password'）
  * @returns {Promise<Object>} 用户信息
  */
-export async function login({ phone, code }) {
+export async function login({ phone, code, password, loginType }) {
   return request('/auth/login', {
     method: 'POST',
-    body: JSON.stringify({ phone, code }),
+    body: JSON.stringify({ phone, code, password, loginType }),
   })
 }
 

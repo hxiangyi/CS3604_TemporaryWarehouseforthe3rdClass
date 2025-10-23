@@ -7,6 +7,17 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--bg-secondary);
+
+  /* 颜色变量 */
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #2c2c2c;
+  --text-primary: #fff;
+  --text-secondary: #999;
+  --accent-primary: #666;
+  --accent-hover: #808080;
+  --border-color: #444;
+  --success-color: #52c41a;
+  --error-color: #ff4d4f;
 }
 
 html, body, #root {
@@ -19,6 +30,8 @@ html, body, #root {
 body {
   min-width: 100vw;
   min-height: 100vh;
+  color: var(--text-primary);
+  background-color: var(--bg-secondary);
 }
 
 a {
@@ -40,4 +53,10 @@ button {
 
 button:focus {
   outline: none;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }

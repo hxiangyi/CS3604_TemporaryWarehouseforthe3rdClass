@@ -7,9 +7,10 @@ export default function Register() {
   const navigate = useNavigate()
   const [phone, setPhone] = useState('')
   const [code, setCode] = useState('')
-  const [agree, setAgree] = useState(false)
   const [countdown, setCountdown] = useState(0)
   const [message, setMessage] = useState('')
+  const [agree, setAgree] = useState(false)
+  const [showSuccess, setShowSuccess] = useState(false)
 
   // 清理定时器
   useEffect(() => {
@@ -57,6 +58,7 @@ export default function Register() {
   // 提交注册
   const handleSubmit = async (e) => {
     e.preventDefault()
+
     if (!phone) {
       setMessage('请输入手机号')
       return
@@ -70,29 +72,43 @@ export default function Register() {
       return
     }
     if (!agree) {
-      setMessage('同意用户协议和隐私政策')
+      setMessage('请同意用户协议')
       return
     }
 
     try {
-      const response = await register({ phone, code })
+      const response = await register({ phone, code, agree })
       setMessage(response.message)
-      // 延迟800ms后跳转
-      setTimeout(() => {
-        navigate('/')
-      }, 800)
+      if (response.message === '注册成功') {
+        setShowSuccess(true)
+      }
     } catch (error) {
       setMessage(error.message)
     }
   }
 
+  if (showSuccess) {
+    return (
+      <div className="auth-container">
+        <div className="auth-content">
+          <div className="success-message">
+            <div className="success-icon">✓</div>
+            <h2>注册成功！</h2>
+            <p>您已成功注册淘贝账号</p>
+            <button onClick={() => navigate('/login')}>去登录</button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="auth-container">
-      <div className="auth-tabs">
-        <div className="tab" onClick={() => navigate('/login')}>登录</div>
-        <div className="tab active">注册</div>
-      </div>
       <div className="auth-content">
+        <div className="auth-tabs">
+          <div className="tab" onClick={() => navigate('/login')}>登录</div>
+          <div className="tab active">注册</div>
+        </div>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <input
@@ -123,16 +139,14 @@ export default function Register() {
               {countdown > 0 ? `${countdown}秒后重试` : '获取验证码'}
             </button>
           </div>
-          <div className="form-group">
-            <label className="agreement">
-              <input
-                type="checkbox"
-                checked={agree}
-                onChange={(e) => setAgree(e.target.checked)}
-                data-testid="agree-checkbox"
-              />
-              <span>同意《淘贝用户协议》和《隐私政策》</span>
-            </label>
+          <div className="agreement">
+            <input
+              type="checkbox"
+              checked={agree}
+              onChange={(e) => setAgree(e.target.checked)}
+              data-testid="agree-checkbox"
+            />
+            <span>同意用户协议和隐私政策</span>
           </div>
           <button
             type="submit"
@@ -142,7 +156,7 @@ export default function Register() {
             注册
           </button>
         </form>
-        {message && <div className="message" data-testid="message">{message}</div>}
+        {message && !showSuccess && <div className="message" data-testid="message">{message}</div>}
       </div>
     </div>
   )
