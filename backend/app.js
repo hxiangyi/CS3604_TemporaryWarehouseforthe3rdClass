@@ -25,17 +25,25 @@ async function getLatestCodeRecord(db, phone) {
 // 请求验证码（登录/注册通用）
 app.post('/auth/request-code', async (req, res) => {
   try {
-    const { phone } = req.body || {};
+    const { phone, isLogin } = req.body || {};
 
     if (!isValidPhone(phone)) {
       return res.status(400).json({ error: '请输入正确的手机号码' });
     }
 
-    const code = generateCode();
-    const expiresAt = Date.now() + 60 * 1000; // 60秒有效期（毫秒值）
-
     const db = await getDb();
     try {
+      // 如果是登录请求，检查手机号是否已注册
+      if (isLogin) {
+        const user = await db.get('SELECT * FROM users WHERE phone = ?', phone);
+        if (!user) {
+          return res.status(400).json({ error: '该手机号未注册，请先完成注册' });
+        }
+      }
+
+      const code = generateCode();
+      const expiresAt = Date.now() + 60 * 1000; // 60秒有效期（毫秒值）
+
       await db.run(
         'INSERT INTO verification_codes (phone, code, expires_at, created_at) VALUES (?, ?, ?, ?)',
         phone,
@@ -43,12 +51,12 @@ app.post('/auth/request-code', async (req, res) => {
         expiresAt,
         new Date().toISOString()
       );
+
+      console.log(`手机号 ${phone} 的验证码是: ${code}`);
+      return res.json({ message: '验证码已发送', seconds: 60 });
     } finally {
       await db.close();
     }
-
-    console.log(`手机号 ${phone} 的验证码是: ${code}`);
-    return res.json({ message: '验证码已发送', seconds: 60 });
   } catch (err) {
     console.error('request-code error:', err);
     return res.status(500).json({ error: '服务器错误，请稍后重试' });
@@ -58,7 +66,7 @@ app.post('/auth/request-code', async (req, res) => {
 // 登录接口
 app.post('/auth/login', async (req, res) => {
   try {
-    const { phone, code } = req.body || {};
+    const { phone, code, password, loginType } = req.body || {};
 
     if (!isValidPhone(phone)) {
       return res.status(400).json({ error: '请输入正确的手机号码' });
@@ -71,6 +79,12 @@ app.post('/auth/login', async (req, res) => {
         return res.status(400).json({ error: '该手机号未注册，请先完成注册' });
       }
 
+      // 密码登录
+      if (loginType === 'password') {
+        return res.status(400).json({ error: '您还未设置密码，请使用验证码登录' });
+      }
+
+      // 验证码登录
       const record = await getLatestCodeRecord(db, phone);
       if (!record) {
         return res.status(400).json({ error: '验证码错误' });
